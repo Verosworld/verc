@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vero's Auth</title>
+  <style>
+    body {
+      background-color: #0e0e0e;
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      background: #1f1f1f;
+      padding: 15px;
+      border-bottom: 2px solid rgba(0, 220, 220, 0.6);
+    }
+    header img {
+      height: 40px;
+      margin-right: 15px;
+    }
+    nav button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 16px;
+      margin-right: 20px;
+      cursor: pointer;
+    }
+    nav button.active {
+      color: rgba(0, 220, 220, 1);
+      border-bottom: 2px solid rgba(0, 220, 220, 1);
+    }
+    .tab {
+      display: none;
+      padding: 20px;
+    }
+    .tab.active {
+      display: block;
+    }
+    input, select, button {
+      margin-top: 10px;
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+    }
+    button {
+      background: rgba(0, 220, 220, 1);
+      color: black;
+      cursor: pointer;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo.gif" alt="Logo" />
+    <h2>Vero's Auth</h2>
+  </header>
+  <nav style="padding: 10px 20px;">
+    <button class="tablink active" onclick="openTab('delete')">Delete Keys</button>
+    <button class="tablink" onclick="openTab('generate')">Generate Keys</button>
+  </nav>
+
+  <div id="delete" class="tab active">
+    <h3>Existing Keys</h3>
+    <ul id="keyList"></ul>
+  </div>
+
+  <div id="generate" class="tab">
+    <h3>Generate New Key</h3>
+    <input type="text" id="genKey" placeholder="Enter key value (or generate below)" /> <br />
+    <select id="genDuration">
+      <option value="1d">1 Day</option>
+      <option value="7d">7 Days</option>
+      <option value="30d">30 Days</option>
+    </select><br />
+    <button onclick="submitKey()">Generate</button>
+    <button onclick="randomKey()">Generate Random Key</button>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://mtidcqoaeszliishcqfo.supabase.co";
+    const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10aWRjcW9hZXN6bGlpc2hjcWZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk0ODI0MTcsImV4cCI6MjA2NTA1ODQxN30.6lVyzXOc_JgdqfhkeeyTkmhtnEfEmKANylA4Zboyjbw";
+
+    async function loadKeys() {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/keys`, {
+        headers: {
+          apikey: SUPABASE_API_KEY,
+          Authorization: `Bearer ${SUPABASE_API_KEY}`,
+        },
+      });
+      const keys = await res.json();
+      const list = document.getElementById('keyList');
+      list.innerHTML = '';
+      keys.forEach(k => {
+        const li = document.createElement('li');
+        li.textContent = `${k.key} | ${k.duration}`;
+        const del = document.createElement('button');
+        del.textContent = 'Delete';
+        del.onclick = async () => {
+          await fetch(`${SUPABASE_URL}/rest/v1/keys?key=eq.${k.key}`, {
+            method: 'DELETE',
+            headers: {
+              apikey: SUPABASE_API_KEY,
+              Authorization: `Bearer ${SUPABASE_API_KEY}`,
+            }
+          });
+          loadKeys();
+        };
+        li.appendChild(del);
+        list.appendChild(li);
+      });
+    }
+
+    async function submitKey() {
+      const key = document.getElementById('genKey').value;
+      const duration = document.getElementById('genDuration').value;
+      await fetch(`${SUPABASE_URL}/rest/v1/keys`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_API_KEY,
+          Authorization: `Bearer ${SUPABASE_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ key, duration })
+      });
+      document.getElementById('genKey').value = '';
+      loadKeys();
+    }
+
+    function randomKey() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let key = '';
+      for (let i = 0; i < 16; i++) {
+        key += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      document.getElementById('genKey').value = key;
+    }
+
+    function openTab(id) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tablink').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    loadKeys();
+  </script>
+</body>
+</html>
