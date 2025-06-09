@@ -1,0 +1,179 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vero's Auth</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0e0e0e;
+      color: white;
+      margin: 0;
+      padding: 0;
+    }
+    .header {
+      background: #1c1c1c;
+      text-align: center;
+      padding: 20px;
+      border-bottom: 2px solid #00dddd;
+    }
+    .header img {
+      height: 64px;
+    }
+    .header h1 {
+      margin: 10px 0 0;
+      color: #00dddd;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      background: #111;
+      border-bottom: 2px solid #00dddd;
+    }
+    .tab {
+      padding: 14px 30px;
+      cursor: pointer;
+      background: #111;
+      color: #ccc;
+      border: none;
+      outline: none;
+      transition: 0.3s;
+      font-size: 16px;
+    }
+    .tab:hover, .tab.active {
+      background: #00dddd;
+      color: #000;
+    }
+    .tab-content {
+      display: none;
+      padding: 30px 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    input, button, select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    input, select {
+      background: #2b2b2b;
+      color: white;
+    }
+    button {
+      background: #00dddd;
+      color: black;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #00aaaa;
+    }
+    .key-item {
+      display: flex;
+      justify-content: space-between;
+      background: #2b2b2b;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    #response {
+      text-align: center;
+      color: #00ff88;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="logo.gif" alt="Logo">
+    <h1>Vero's Auth</h1>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab(event, 'generateTab')">Generate Key</button>
+    <button class="tab" onclick="switchTab(event, 'deleteTab')">Delete Key</button>
+  </div>
+
+  <div id="generateTab" class="tab-content active">
+    <select id="duration">
+      <option value="1d">1 Day</option>
+      <option value="7d">7 Days</option>
+      <option value="30d">30 Days</option>
+    </select>
+    <button onclick="generateKey()">Generate & Add Key</button>
+    <div id="response"></div>
+  </div>
+
+  <div id="deleteTab" class="tab-content">
+    <h2>All Keys</h2>
+    <div id="keysList"></div>
+  </div>
+
+  <script>
+    function switchTab(evt, tabId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      evt.target.classList.add('active');
+    }
+
+    function generateRandomKey(length = 16) {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+      let result = "";
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+
+    function generateKey() {
+      const duration = document.getElementById("duration").value;
+      const key = generateRandomKey();
+
+      fetch(`/api/add?key=${key}&duration=${duration}`)
+        .then(res => res.text())
+        .then(text => {
+          document.getElementById("response").textContent = text;
+          fetchKeys();
+        });
+    }
+
+    function fetchKeys() {
+      fetch("/api/keys")
+        .then(res => res.text())
+        .then(text => {
+          const list = document.getElementById("keysList");
+          list.innerHTML = "";
+          text.split("\n").forEach(line => {
+            const [key, duration] = line.trim().split("|");
+            if (key && duration) {
+              const div = document.createElement("div");
+              div.className = "key-item";
+              div.innerHTML = `<span>${key} | ${duration}</span>
+                <button onclick="deleteKey('${key}')">Delete</button>`;
+              list.appendChild(div);
+            }
+          });
+        });
+    }
+
+    function deleteKey(key) {
+      fetch(`/api/delete?key=${key}`)
+        .then(res => res.text())
+        .then(text => {
+          document.getElementById("response").textContent = text;
+          fetchKeys();
+        });
+    }
+
+    fetchKeys();
+  </script>
+</body>
+</html>
