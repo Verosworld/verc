@@ -5,88 +5,558 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Vero's Auth</title>
   <style>
-    body {
-      background-color: #0e0e0e;
-      color: white;
-      font-family: Arial, sans-serif;
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
+
+    body {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+      color: white;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      animation: fadeIn 0.8s ease-out;
+      overflow-x: hidden;
+    }
+
+    @keyframes fadeIn {
+      from { 
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Animated background particles */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 50%, rgba(0, 220, 220, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 80% 20%, rgba(120, 0, 255, 0.1) 0%, transparent 50%),
+                  radial-gradient(circle at 40% 80%, rgba(255, 0, 150, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+    }
+
+    .success-alert {
+      position: fixed;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(45deg, #00dc82, #36d399);
+      padding: 16px 32px;
+      border-radius: 12px;
+      color: #0a0a0a;
+      font-weight: 600;
+      animation: slideInAlert 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      z-index: 1000;
+      box-shadow: 0 8px 32px rgba(0, 220, 130, 0.3);
+      backdrop-filter: blur(10px);
+    }
+    
+    @keyframes slideInAlert {
+      from {
+        transform: translateX(-50%) translateY(-100px) scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(-50%) translateY(0) scale(1);
+        opacity: 1;
+      }
+    }
+    
+    .success-alert.fade-out {
+      animation: slideOutAlert 0.5s ease-out forwards;
+    }
+    
+    @keyframes slideOutAlert {
+      to {
+        transform: translateX(-50%) translateY(-100px) scale(0.8);
+        opacity: 0;
+      }
+    }
+
     header {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 30px;
       display: flex;
       align-items: center;
-      background: #1f1f1f;
-      padding: 15px;
-      border-bottom: 2px solid rgba(0, 220, 220, 0.6);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
     }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 220, 220, 0.1), transparent);
+      animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
     header img {
-      height: 40px;
-      margin-right: 15px;
-    }
-    nav button {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 16px;
+      height: 48px;
       margin-right: 20px;
+      border-radius: 8px;
+      filter: drop-shadow(0 4px 8px rgba(0, 220, 220, 0.3));
+    }
+
+    header h2 {
+      font-size: 2rem;
+      background: linear-gradient(45deg, #00dcdc, #7c3aed, #ec4899);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+      position: relative;
+    }
+
+    nav {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    nav button {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 16px;
+      font-weight: 500;
+      margin-right: 30px;
       cursor: pointer;
+      padding: 12px 24px;
+      border-radius: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
     }
+
+    nav button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, rgba(0, 220, 220, 0.1), rgba(124, 58, 237, 0.1));
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+    }
+
+    nav button:hover::before {
+      opacity: 1;
+    }
+
     nav button.active {
-      color: rgba(0, 220, 220, 1);
-      border-bottom: 2px solid rgba(0, 220, 220, 1);
+      color: #00dcdc;
+      background: rgba(0, 220, 220, 0.1);
+      border: 1px solid rgba(0, 220, 220, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 220, 220, 0.2);
     }
+
+    nav button:hover {
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+    }
+
+    .tab-content {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tab-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0, 220, 220, 0.5), transparent);
+    }
+
+    .tab-content h3 {
+      margin: 0 0 25px 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+      background: linear-gradient(45deg, #00dcdc, #7c3aed);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
     .tab {
       display: none;
-      padding: 20px;
     }
+
     .tab.active {
       display: block;
     }
-    input, select, button {
-      margin-top: 10px;
-      padding: 8px;
+
+    .key-item {
+      display: flex;
+      align-items: center;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      margin: 15px 0;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: slideUpItem 0.5s ease-out forwards;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .key-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .key-item:hover::before {
+      left: 100%;
+    }
+
+    @keyframes slideUpItem {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .key-item:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      border-color: rgba(0, 220, 220, 0.3);
+    }
+
+    .key-item input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin-right: 15px;
+      color: white;
+      font-family: 'Monaco', 'Consolas', monospace;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .key-item input:focus {
+      outline: none;
+      background: rgba(0, 0, 0, 0.5);
+      border-color: rgba(0, 220, 220, 0.5);
+      box-shadow: 0 0 0 3px rgba(0, 220, 220, 0.1);
+    }
+
+    .key-item .duration {
+      color: rgba(255, 255, 255, 0.6);
+      margin-right: 15px;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 6px 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+    }
+
+    .copy-button {
+      background: linear-gradient(45deg, #00dcdc, #36d399);
       border: none;
-      border-radius: 5px;
-    }
-    button {
-      background: rgba(0, 220, 220, 1);
-      color: black;
+      padding: 10px 20px;
+      border-radius: 10px;
       cursor: pointer;
+      color: #0a0a0a;
+      font-weight: 600;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-right: 10px;
+      position: relative;
+      overflow: hidden;
     }
-    ul {
-      list-style: none;
-      padding: 0;
+
+    .copy-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.3s ease;
     }
-    li {
-      margin: 10px 0;
+
+    .copy-button:hover::before {
+      left: 100%;
+    }
+
+    .copy-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 220, 220, 0.4);
+    }
+
+    .copy-button.copied {
+      background: linear-gradient(45deg, #10b981, #059669);
+      transform: scale(0.95);
+    }
+
+    .key-item button:last-child {
+      background: linear-gradient(45deg, #ef4444, #dc2626);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .key-item button:last-child::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.3s ease;
+    }
+
+    .key-item button:last-child:hover::before {
+      left: 100%;
+    }
+
+    .key-item button:last-child:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+    }
+
+    select {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 12px 16px;
+      border-radius: 12px;
+      margin: 15px 0;
+      width: 200px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: rgba(0, 220, 220, 0.5);
+      box-shadow: 0 0 0 3px rgba(0, 220, 220, 0.1);
+    }
+
+    select option {
+      background: #1a1a1a;
+      color: white;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 15px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .button-group button {
+      background: linear-gradient(45deg, #7c3aed, #a855f7);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .button-group button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.3s ease;
+    }
+
+    .button-group button:hover::before {
+      left: 100%;
+    }
+
+    .button-group button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+    }
+
+    .button-group button:active {
+      transform: translateY(0);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+      }
+
+      header {
+        padding: 20px;
+        flex-direction: column;
+        text-align: center;
+      }
+
+      header img {
+        margin: 0 0 15px 0;
+      }
+
+      nav button {
+        margin-right: 15px;
+        margin-bottom: 10px;
+      }
+
+      .key-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .key-item input {
+        margin-right: 0;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+    }
+
+    /* Loading animation for keys */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .loading::after {
+      content: '';
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(0, 220, 220, 0.3);
+      border-top: 3px solid #00dcdc;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
   </style>
 </head>
 <body>
-  <header>
-    <img src="logo.gif" alt="Logo" />
-    <h2>Vero's Auth</h2>
-  </header>
-  <nav style="padding: 10px 20px;">
-    <button class="tablink active" onclick="openTab('delete')">Delete Keys</button>
-    <button class="tablink" onclick="openTab('generate')">Generate Keys</button>
-  </nav>
+  <div class="container">
+    <header>
+      <img src="logo.gif" alt="Logo" />
+      <h2>Vero's Auth</h2>
+    </header>
+    
+    <nav>
+      <button class="tablink active" onclick="openTab('delete')">Delete Keys</button>
+      <button class="tablink" onclick="openTab('generate')">Generate Keys</button>
+    </nav>
 
-  <div id="delete" class="tab active">
-    <h3>Existing Keys</h3>
-    <ul id="keyList"></ul>
-  </div>
+    <div id="delete" class="tab tab-content active">
+      <h3>🔑 Existing Keys</h3>
+      <div id="keyList" class="key-list"></div>
+    </div>
 
-  <div id="generate" class="tab">
-    <h3>Generate New Key</h3>
-    <input type="text" id="genKey" placeholder="Enter key value (or generate below)" /> <br />
-    <select id="genDuration">
-      <option value="1d">1 Day</option>
-      <option value="7d">7 Days</option>
-      <option value="30d">30 Days</option>
-    </select><br />
-    <button onclick="submitKey()">Generate</button>
-    <button onclick="randomKey()">Generate Random Key</button>
+    <div id="generate" class="tab tab-content">
+      <h3>✨ Generate New Key</h3>
+      <div class="key-item">
+        <input type="text" id="genKey" placeholder="Enter key value (or generate below)" />
+        <button class="copy-button" onclick="copyKey()">Copy</button>
+      </div>
+      <select id="genDuration">
+        <option value="1d">1 Day</option>
+        <option value="7d">7 Days</option>
+        <option value="30d">30 Days</option>
+      </select>
+      <div class="button-group">
+        <button onclick="submitKey()">Generate Key</button>
+        <button onclick="randomKey()">Generate Random Key</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -94,55 +564,123 @@
     const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10aWRjcW9hZXN6bGlpc2hjcWZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk0ODI0MTcsImV4cCI6MjA2NTA1ODQxN30.6lVyzXOc_JgdqfhkeeyTkmhtnEfEmKANylA4Zboyjbw";
 
     async function loadKeys() {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/keys`, {
-        headers: {
-          apikey: SUPABASE_API_KEY,
-          Authorization: `Bearer ${SUPABASE_API_KEY}`,
-        },
-      });
-      const keys = await res.json();
-      const list = document.getElementById('keyList');
-      list.innerHTML = '';
-      keys.forEach(k => {
-        const li = document.createElement('li');
-        li.textContent = `${k.key} | ${k.duration}`;
-        const del = document.createElement('button');
-        del.textContent = 'Delete';
-        del.onclick = async () => {
-          await fetch(`${SUPABASE_URL}/rest/v1/keys?key=eq.${k.key}`, {
-            method: 'DELETE',
-            headers: {
-              apikey: SUPABASE_API_KEY,
-              Authorization: `Bearer ${SUPABASE_API_KEY}`,
-            }
-          });
+      const keyList = document.getElementById('keyList');
+      keyList.innerHTML = '<div class="loading"></div>';
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/keys`, {
+          headers: {
+            apikey: SUPABASE_API_KEY,
+            Authorization: `Bearer ${SUPABASE_API_KEY}`,
+          }
+        });
+        
+        if (!res.ok) throw new Error('Failed to fetch keys');
+        
+        const keys = await res.json();
+        keyList.innerHTML = '';
+        
+        if (keys.length === 0) {
+          keyList.innerHTML = '<div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">No keys found. Generate your first key!</div>';
+          return;
+        }
+
+        keys.forEach((key, index) => {
+          const keyItem = document.createElement('div');
+          keyItem.className = 'key-item';
+          keyItem.style.animationDelay = `${index * 0.1}s`;
+          
+          const input = document.createElement('input');
+          input.value = key.key;
+          input.readOnly = true;
+          
+          const duration = document.createElement('span');
+          duration.className = 'duration';
+          duration.textContent = key.duration;
+          
+          const copyButton = document.createElement('button');
+          copyButton.className = 'copy-button';
+          copyButton.textContent = 'Copy';
+          copyButton.onclick = () => copyKey(key.key);
+          
+          const deleteButton = document.createElement('button');
+          deleteButton.textContent = 'Delete';
+          deleteButton.onclick = () => deleteKey(key.id);
+          
+          keyItem.appendChild(input);
+          keyItem.appendChild(duration);
+          keyItem.appendChild(copyButton);
+          keyItem.appendChild(deleteButton);
+          keyList.appendChild(keyItem);
+        });
+      } catch (error) {
+        keyList.innerHTML = `<div style="text-align: center; padding: 40px; color: #ef4444;">Error loading keys: ${error.message}</div>`;
+      }
+    }
+
+    async function deleteKey(id) {
+      if (!confirm('Are you sure you want to delete this key?')) return;
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/keys?id=eq.${id}`, {
+          method: 'DELETE',
+          headers: {
+            apikey: SUPABASE_API_KEY,
+            Authorization: `Bearer ${SUPABASE_API_KEY}`,
+          }
+        });
+
+        if (res.ok) {
+          showSuccessAlert('Key deleted successfully!');
           loadKeys();
-        };
-        li.appendChild(del);
-        list.appendChild(li);
-      });
+        } else {
+          throw new Error('Failed to delete key');
+        }
+      } catch (error) {
+        alert('Error deleting key: ' + error.message);
+      }
     }
 
     async function submitKey() {
-      const key = document.getElementById('genKey').value;
+      const keyInput = document.getElementById('genKey');
       const duration = document.getElementById('genDuration').value;
-      await fetch(`${SUPABASE_URL}/rest/v1/keys`, {
-        method: 'POST',
-        headers: {
-          apikey: SUPABASE_API_KEY,
-          Authorization: `Bearer ${SUPABASE_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ key, duration })
-      });
-      document.getElementById('genKey').value = '';
-      loadKeys();
+      const key = keyInput.value.trim();
+
+      if (!key) {
+        alert('Please enter a key value');
+        return;
+      }
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/keys`, {
+          method: 'POST',
+          headers: {
+            apikey: SUPABASE_API_KEY,
+            Authorization: `Bearer ${SUPABASE_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            key: key,
+            duration: duration
+          })
+        });
+
+        if (res.ok) {
+          showSuccessAlert('Key generated successfully!');
+          keyInput.value = '';
+          loadKeys();
+        } else {
+          throw new Error('Failed to generate key');
+        }
+      } catch (error) {
+        alert('Error generating key: ' + error.message);
+      }
     }
 
     function randomKey() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
       let key = '';
-      for (let i = 0; i < 16; i++) {
+      for (let i = 0; i < 24; i++) {
         key += chars.charAt(Math.floor(Math.random() * chars.length));
       }
       document.getElementById('genKey').value = key;
@@ -155,6 +693,39 @@
       event.target.classList.add('active');
     }
 
+    function copyKey(keyValue) {
+      const value = keyValue || document.getElementById('genKey').value;
+      if (value) {
+        navigator.clipboard.writeText(value).then(() => {
+          const copyButtons = document.querySelectorAll('.copy-button');
+          copyButtons.forEach(button => {
+            const input = button.parentElement.querySelector('input');
+            if (input && input.value === value) {
+              const originalText = button.textContent;
+              button.textContent = 'Copied!';
+              button.classList.add('copied');
+              setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('copied');
+              }, 2000);
+            }
+          });
+        }).catch(err => {
+          alert('Failed to copy key: ' + err);
+        });
+      }
+    }
+    function showSuccessAlert(message) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'success-alert';
+      alertDiv.textContent = message;
+      document.body.appendChild(alertDiv);
+
+      setTimeout(() => {
+        alertDiv.classList.add('fade-out');
+        setTimeout(() => alertDiv.remove(), 500);
+      }, 2500);
+    }
     loadKeys();
   </script>
 </body>
