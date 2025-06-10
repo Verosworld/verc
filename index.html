@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vero's Auth</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script disable-devtool-auto="" src="dis.js"></script>
+  <title>Vero's Reseller Panel</title>
   <style>
     * {
       margin: 0;
@@ -12,457 +13,368 @@
     }
 
     body {
-      background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
-      color: white;
-      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b69 100%);
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       min-height: 100vh;
-      animation: fadeIn 0.8s ease-out;
+      position: relative;
       overflow-x: hidden;
     }
 
-    @keyframes fadeIn {
-      from { 
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to { 
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
     /* Animated background particles */
-    body::before {
-      content: '';
+    .particles {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: radial-gradient(circle at 20% 50%, rgba(0, 220, 220, 0.1) 0%, transparent 50%),
-                  radial-gradient(circle at 80% 20%, rgba(120, 0, 255, 0.1) 0%, transparent 50%),
-                  radial-gradient(circle at 40% 80%, rgba(255, 0, 150, 0.1) 0%, transparent 50%);
+      overflow: hidden;
+      z-index: 1;
       pointer-events: none;
-      z-index: -1;
     }
 
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 20px;
-      position: relative;
+    .particle {
+      position: absolute;
+      background: rgba(147, 51, 234, 0.1);
+      border-radius: 50%;
+      animation: float 8s ease-in-out infinite;
     }
 
-    .success-alert {
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
+      50% { transform: translateY(-30px) rotate(180deg); opacity: 0.8; }
+    }
+
+    /* Blur overlay when not authenticated */
+    .blur-overlay {
       position: fixed;
-      top: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: linear-gradient(45deg, #00dc82, #36d399);
-      padding: 16px 32px;
-      border-radius: 12px;
-      color: #0a0a0a;
-      font-weight: 600;
-      animation: slideInAlert 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-      z-index: 1000;
-      box-shadow: 0 8px 32px rgba(0, 220, 130, 0.3);
-      backdrop-filter: blur(10px);
-    }
-    
-    @keyframes slideInAlert {
-      from {
-        transform: translateX(-50%) translateY(-100px) scale(0.8);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(-50%) translateY(0) scale(1);
-        opacity: 1;
-      }
-    }
-    
-    .success-alert.fade-out {
-      animation: slideOutAlert 0.5s ease-out forwards;
-    }
-    
-    @keyframes slideOutAlert {
-      to {
-        transform: translateX(-50%) translateY(-100px) scale(0.8);
-        opacity: 0;
-      }
-    }
-
-    header {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 24px;
-      margin-bottom: 30px;
-      display: flex;
-      align-items: center;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      position: relative;
-      overflow: hidden;
-    }
-
-    header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(0, 220, 220, 0.1), transparent);
-      animation: shimmer 3s infinite;
-    }
-
-    @keyframes shimmer {
-      0% { left: -100%; }
-      100% { left: 100%; }
-    }
-
-    header img {
-      height: 48px;
-      margin-right: 20px;
-      border-radius: 8px;
-      filter: drop-shadow(0 4px 8px rgba(0, 220, 220, 0.3));
-    }
-
-    header h2 {
-      font-size: 2rem;
-      background: linear-gradient(45deg, #00dcdc, #7c3aed, #ec4899);
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      font-weight: 700;
-      position: relative;
-    }
-
-    nav {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 20px;
-      border-radius: 20px;
-      margin-bottom: 30px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    }
-
-    nav button {
-      background: transparent;
-      border: none;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 16px;
-      font-weight: 500;
-      margin-right: 30px;
-      cursor: pointer;
-      padding: 12px 24px;
-      border-radius: 12px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    nav button::before {
-      content: '';
-      position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(45deg, rgba(0, 220, 220, 0.1), rgba(124, 58, 237, 0.1));
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: -1;
-    }
-
-    nav button:hover::before {
+      backdrop-filter: blur(15px);
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 2;
+      transition: all 0.6s ease;
       opacity: 1;
     }
 
-    nav button.active {
-      color: #00dcdc;
-      background: rgba(0, 220, 220, 0.1);
-      border: 1px solid rgba(0, 220, 220, 0.3);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 220, 220, 0.2);
+    .blur-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
     }
 
-    nav button:hover {
+    /* Main container */
+    .container {
+      position: relative;
+      z-index: 3;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    /* Header section */
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: slideDown 0.8s ease-out;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #9333ea, #7c3aed);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
       color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+      font-weight: bold;
+      animation: pulse 3s ease-in-out infinite;
+      box-shadow: 0 15px 35px rgba(147, 51, 234, 0.4);
+      position: relative;
+      overflow: hidden;
     }
 
-    .tab-content {
+    .logo::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      animation: shine 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 15px 35px rgba(147, 51, 234, 0.4); }
+      50% { transform: scale(1.05); box-shadow: 0 20px 45px rgba(147, 51, 234, 0.6); }
+    }
+
+    @keyframes shine {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #9333ea, #7c3aed, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: #a1a1aa;
+      margin-bottom: 30px;
+    }
+
+    /* Discord button */
+    .discord-section {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .discord-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px 30px;
+      background: linear-gradient(135deg, #5865f2, #4752c4);
+      color: white;
+      text-decoration: none;
+      border-radius: 15px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(88, 101, 242, 0.3);
+    }
+
+    .discord-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 40px rgba(88, 101, 242, 0.5);
+    }
+
+    /* Login section */
+    .login-section {
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 30px;
       border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-      animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .tab-content::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(0, 220, 220, 0.5), transparent);
-    }
-
-    .tab-content h3 {
-      margin: 0 0 25px 0;
-      font-size: 1.5rem;
-      font-weight: 600;
-      background: linear-gradient(45deg, #00dcdc, #7c3aed);
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .tab {
-      display: none;
-    }
-
-    .tab.active {
-      display: block;
-    }
-
-    .key-item {
-      display: flex;
-      align-items: center;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      margin: 15px 0;
-      opacity: 0;
-      transform: translateY(20px);
-      animation: slideUpItem 0.5s ease-out forwards;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .key-item::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .key-item:hover::before {
-      left: 100%;
-    }
-
-    @keyframes slideUpItem {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .key-item:hover {
-      background: rgba(255, 255, 255, 0.08);
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-      border-color: rgba(0, 220, 220, 0.3);
-    }
-
-    .key-item input {
-      flex: 1;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 12px 16px;
-      border-radius: 12px;
-      margin-right: 15px;
-      color: white;
-      font-family: 'Monaco', 'Consolas', monospace;
-      font-size: 14px;
-      transition: all 0.3s ease;
-    }
-
-    .key-item input:focus {
-      outline: none;
-      background: rgba(0, 0, 0, 0.5);
-      border-color: rgba(0, 220, 220, 0.5);
-      box-shadow: 0 0 0 3px rgba(0, 220, 220, 0.1);
-    }
-
-    .key-item .duration {
-      color: rgba(255, 255, 255, 0.6);
-      margin-right: 15px;
-      font-size: 14px;
-      font-weight: 500;
-      padding: 6px 12px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-    }
-
-    .copy-button {
-      background: linear-gradient(45deg, #00dcdc, #36d399);
-      border: none;
-      padding: 10px 20px;
-      border-radius: 10px;
-      cursor: pointer;
-      color: #0a0a0a;
-      font-weight: 600;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      margin-right: 10px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .copy-button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transition: left 0.3s ease;
-    }
-
-    .copy-button:hover::before {
-      left: 100%;
-    }
-
-    .copy-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 220, 220, 0.4);
-    }
-
-    .copy-button.copied {
-      background: linear-gradient(45deg, #10b981, #059669);
-      transform: scale(0.95);
-    }
-
-    .key-item button:last-child {
-      background: linear-gradient(45deg, #ef4444, #dc2626);
-      border: none;
-      padding: 10px 20px;
-      border-radius: 10px;
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .key-item button:last-child::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transition: left 0.3s ease;
-    }
-
-    .key-item button:last-child:hover::before {
-      left: 100%;
-    }
-
-    .key-item button:last-child:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
-    }
-
-    select {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: white;
-      padding: 12px 16px;
-      border-radius: 12px;
-      margin: 15px 0;
-      width: 200px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    select:focus {
-      outline: none;
-      border-color: rgba(0, 220, 220, 0.5);
-      box-shadow: 0 0 0 3px rgba(0, 220, 220, 0.1);
-    }
-
-    select option {
-      background: #1a1a1a;
-      color: white;
-    }
-
-    .button-group {
-      display: flex;
-      gap: 15px;
-      margin-top: 20px;
-      flex-wrap: wrap;
-    }
-
-    .button-group button {
-      background: linear-gradient(45deg, #7c3aed, #a855f7);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .button-group button::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transition: left 0.3s ease;
-    }
-
-    .button-group button:hover::before {
-      left: 100%;
-    }
-
-    .button-group button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
-    }
-
-    .button-group button:active {
-      transform: translateY(0);
+      padding: 30px;
+      margin-bottom: 30px;
+      animation: slideUp 0.8s ease-out 0.2s both;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
     }
 
     @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-section h2 {
+      color: #9333ea;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .login-form {
+      display: flex;
+      gap: 15px;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    /* Input and button styles */
+    input, select, button {
+      padding: 15px 20px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    input {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    input:focus {
+      border-color: #9333ea;
+      box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.2);
+      transform: translateY(-2px);
+    }
+
+    input::placeholder {
+      color: #a1a1aa;
+    }
+
+    button {
+      background: linear-gradient(135deg, #9333ea, #7c3aed);
+      border: none;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      min-width: 120px;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(147, 51, 234, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    /* Section styling */
+    .section {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      animation: slideUp 0.8s ease-out 0.4s both;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .section h2 {
+      color: #9333ea;
+      margin-bottom: 25px;
+      font-size: 1.8rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section h2::before {
+      content: '';
+      width: 4px;
+      height: 30px;
+      background: linear-gradient(135deg, #9333ea, #7c3aed);
+      border-radius: 2px;
+    }
+
+    /* Key item styling */
+    .key-item {
+      background: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(124, 58, 237, 0.1));
+      border: 1px solid rgba(147, 51, 234, 0.2);
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      transition: all 0.3s ease;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .key-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(147, 51, 234, 0.2);
+      border-color: rgba(147, 51, 234, 0.4);
+    }
+
+    .key-item input {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin: 0;
+      min-width: 0;
+    }
+
+    .key-item .duration {
+      background: linear-gradient(135deg, #06b6d4, #0891b2);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .copy-button {
+      background: linear-gradient(135deg, #059669, #047857);
+      min-width: 80px;
+    }
+
+    .copy-button:hover {
+      box-shadow: 0 8px 20px rgba(5, 150, 105, 0.4);
+    }
+
+    .delete-button {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      min-width: 80px;
+    }
+
+    .delete-button:hover {
+      box-shadow: 0 8px 20px rgba(220, 38, 38, 0.4);
+    }
+
+    /* Generate section */
+    .generate-form {
+      display: flex;
+      gap: 15px;
+      align-items: end;
+      flex-wrap: wrap;
+    }
+
+    .generate-form input {
+      flex: 2;
+      min-width: 200px;
+    }
+
+    .generate-form select {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    /* No keys message */
+    .no-keys {
+      text-align: center;
+      color: #a1a1aa;
+      font-style: italic;
+      padding: 40px 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 15px;
+      border: 2px dashed rgba(255, 255, 255, 0.1);
     }
 
     /* Responsive design */
@@ -470,91 +382,104 @@
       .container {
         padding: 15px;
       }
-
-      header {
-        padding: 20px;
+      
+      h1 {
+        font-size: 2.5rem;
+      }
+      
+      .login-form, .generate-form {
         flex-direction: column;
-        text-align: center;
       }
-
-      header img {
-        margin: 0 0 15px 0;
+      
+      .login-form input, .generate-form input, .generate-form select {
+        min-width: 100%;
+        flex: none;
       }
-
-      nav button {
-        margin-right: 15px;
-        margin-bottom: 10px;
-      }
-
+      
       .key-item {
         flex-direction: column;
         align-items: stretch;
         gap: 10px;
       }
-
+      
       .key-item input {
-        margin-right: 0;
+        margin-bottom: 10px;
       }
-
-      .button-group {
-        flex-direction: column;
+      
+      .key-item .button-group {
+        display: flex;
+        gap: 10px;
       }
     }
 
-    /* Loading animation for keys */
-    .loading {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 40px;
+    /* Success/Error animations */
+    .success-flash {
+      animation: successFlash 0.6s ease-out;
     }
 
-    .loading::after {
-      content: '';
-      width: 40px;
-      height: 40px;
-      border: 3px solid rgba(0, 220, 220, 0.3);
-      border-top: 3px solid #00dcdc;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
+    @keyframes successFlash {
+      0% { background-color: rgba(34, 197, 94, 0.2); }
+      100% { background-color: transparent; }
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    .error-shake {
+      animation: errorShake 0.6s ease-out;
+    }
+
+    @keyframes errorShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
     }
   </style>
 </head>
 <body>
+  <div class="particles"></div>
+  <div class="blur-overlay" id="blurOverlay"></div>
+  
   <div class="container">
-    <header>
-      <img src="logo.gif" alt="Logo" />
-      <h2>Vero's Auth</h2>
-    </header>
-    
-    <nav>
-      <button class="tablink active" onclick="openTab('delete')">Delete Keys</button>
-      <button class="tablink" onclick="openTab('generate')">Generate Keys</button>
-    </nav>
-
-    <div id="delete" class="tab tab-content active">
-      <h3>🔑 Existing Keys</h3>
-      <div id="keyList" class="key-list"></div>
+    <div class="header">
+      <div class="logo">
+        <img src="logo.gif" alt="Vero Logo" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" onerror="this.style.display='none'; this.parentElement.innerHTML='V';">
+      </div>
+      <h1>Vero's Reseller Auth</h1>
+      <p class="subtitle">Manage your keys and reseller access</p>
     </div>
 
-    <div id="generate" class="tab tab-content">
-      <h3>✨ Generate New Key</h3>
-      <div class="key-item">
-        <input type="text" id="genKey" placeholder="Enter key value (or generate below)" />
-        <button class="copy-button" onclick="copyKey()">Copy</button>
+    <div class="discord-section">
+      <a href="https://discord.gg/TQ8pPDKYey" class="discord-button" target="_blank">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.211.375-.445.865-.608 1.249a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.249.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.194.372.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+        </svg>
+        Join Our Discord
+      </a>
+    </div>
+
+    <div class="login-section">
+      <h2>🔐 Reseller Login</h2>
+      <div class="login-form">
+        <input type="text" id="resellerIdInput" placeholder="Enter your ResellerID (e.g. ResellerID-xxxxxx)">
+        <button onclick="setResellerId()">Login</button>
       </div>
-      <select id="genDuration">
-        <option value="1d">1 Day</option>
-        <option value="7d">7 Days</option>
-        <option value="30d">30 Days</option>
-      </select>
-      <div class="button-group">
-        <button onclick="submitKey()">Generate Key</button>
-        <button onclick="randomKey()">Generate Random Key</button>
+    </div>
+
+    <div class="section">
+      <h2>🔑 Your Keys</h2>
+      <div id="keyList"></div>
+    </div>
+
+    <div class="section">
+      <h2>🔑 Generate New Key</h2>
+      <div class="generate-form">
+        <input type="text" id="genKey" placeholder="Enter custom key or click generate">
+        <select id="genDuration">
+          <option value="1d">1 Day</option>
+          <option value="3d">3 Days</option>
+          <option value="7d">7 Days</option>
+          <option value="30d">30 Days</option>
+        </select>
+        <button onclick="submitKey()">Submit</button>
+        <button onclick="randomKey()">Generate Random</button>
       </div>
     </div>
   </div>
@@ -563,170 +488,318 @@
     const SUPABASE_URL = "https://mtidcqoaeszliishcqfo.supabase.co";
     const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im10aWRjcW9hZXN6bGlpc2hjcWZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk0ODI0MTcsImV4cCI6MjA2NTA1ODQxN30.6lVyzXOc_JgdqfhkeeyTkmhtnEfEmKANylA4Zboyjbw";
 
+    let RESELLER_ID = localStorage.getItem('reseller_id') || null;
+
+    // Create animated particles
+    function createParticles() {
+      const particlesContainer = document.querySelector('.particles');
+      const particleCount = 20;
+
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        const size = Math.random() * 8 + 4;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.left = `${Math.random() * 100}%`;
+        particle.style.top = `${Math.random() * 100}%`;
+        particle.style.animationDelay = `${Math.random() * 8}s`;
+        particle.style.animationDuration = `${8 + Math.random() * 4}s`;
+        
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    // Update blur overlay based on login status
+    function updateBlurOverlay() {
+      const blurOverlay = document.getElementById('blurOverlay');
+      if (RESELLER_ID) {
+        blurOverlay.classList.add('hidden');
+      } else {
+        blurOverlay.classList.remove('hidden');
+      }
+    }
+
+    async function setResellerId() {
+  const input = document.getElementById('resellerIdInput');
+  const id = input.value.trim();
+
+  if (!id.startsWith("ResellerID-")) {
+    input.classList.add('error-shake');
+    setTimeout(() => input.classList.remove('error-shake'), 600);
+    alert("Reseller ID must start with 'ResellerID-'");
+    return;
+  }
+
+  const check = await fetch(`${SUPABASE_URL}/rest/v1/resellers?select=id&eq.id=${id}`, {
+    headers: {
+      apikey: SUPABASE_API_KEY,
+      Authorization: `Bearer ${SUPABASE_API_KEY}`
+    }
+  });
+
+  const result = await check.json();
+  if (result.length === 0) {
+    input.classList.add('error-shake');
+    setTimeout(() => input.classList.remove('error-shake'), 600);
+    alert("Invalid Reseller ID. Please contact admin.");
+    localStorage.removeItem('reseller_id');
+    return;
+  }
+
+  RESELLER_ID = id;
+  localStorage.setItem('reseller_id', RESELLER_ID);
+  document.getElementById('resellerIdInput').value = id;
+
+  updateBlurOverlay();
+  loadKeys();
+}
+
     async function loadKeys() {
       const keyList = document.getElementById('keyList');
-      keyList.innerHTML = '<div class="loading"></div>';
-
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/keys`, {
-          headers: {
-            apikey: SUPABASE_API_KEY,
-            Authorization: `Bearer ${SUPABASE_API_KEY}`,
-          }
-        });
-        
-        if (!res.ok) throw new Error('Failed to fetch keys');
-        
-        const keys = await res.json();
-        keyList.innerHTML = '';
-        
-        if (keys.length === 0) {
-          keyList.innerHTML = '<div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">No keys found. Generate your first key!</div>';
-          return;
-        }
-
-        keys.forEach((key, index) => {
-          const keyItem = document.createElement('div');
-          keyItem.className = 'key-item';
-          keyItem.style.animationDelay = `${index * 0.1}s`;
-          
-          const input = document.createElement('input');
-          input.value = key.key;
-          input.readOnly = true;
-          
-          const duration = document.createElement('span');
-          duration.className = 'duration';
-          duration.textContent = key.duration;
-          
-          const copyButton = document.createElement('button');
-          copyButton.className = 'copy-button';
-          copyButton.textContent = 'Copy';
-          copyButton.onclick = () => copyKey(key.key);
-          
-          const deleteButton = document.createElement('button');
-          deleteButton.textContent = 'Delete';
-          deleteButton.onclick = () => deleteKey(key.id);
-          
-          keyItem.appendChild(input);
-          keyItem.appendChild(duration);
-          keyItem.appendChild(copyButton);
-          keyItem.appendChild(deleteButton);
-          keyList.appendChild(keyItem);
-        });
-      } catch (error) {
-        keyList.innerHTML = `<div style="text-align: center; padding: 40px; color: #ef4444;">Error loading keys: ${error.message}</div>`;
-      }
-    }
-
-    async function deleteKey(id) {
-      if (!confirm('Are you sure you want to delete this key?')) return;
-
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/keys?id=eq.${id}`, {
-          method: 'DELETE',
-          headers: {
-            apikey: SUPABASE_API_KEY,
-            Authorization: `Bearer ${SUPABASE_API_KEY}`,
-          }
-        });
-
-        if (res.ok) {
-          showSuccessAlert('Key deleted successfully!');
-          loadKeys();
-        } else {
-          throw new Error('Failed to delete key');
-        }
-      } catch (error) {
-        alert('Error deleting key: ' + error.message);
-      }
-    }
-
-    async function submitKey() {
-      const keyInput = document.getElementById('genKey');
-      const duration = document.getElementById('genDuration').value;
-      const key = keyInput.value.trim();
-
-      if (!key) {
-        alert('Please enter a key value');
+      keyList.innerHTML = '';
+      
+      if (!RESELLER_ID) {
+        keyList.innerHTML = '<div class="no-keys">Please log in with your ResellerID to view your keys.</div>';
         return;
       }
 
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/keys`, {
-          method: 'POST',
-          headers: {
-            apikey: SUPABASE_API_KEY,
-            Authorization: `Bearer ${SUPABASE_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            key: key,
-            duration: duration
-          })
-        });
-
-        if (res.ok) {
-          showSuccessAlert('Key generated successfully!');
-          keyInput.value = '';
-          loadKeys();
-        } else {
-          throw new Error('Failed to generate key');
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/keys?reseller_id=eq.${RESELLER_ID}`, {
+        headers: {
+          apikey: SUPABASE_API_KEY,
+          Authorization: `Bearer ${SUPABASE_API_KEY}`
         }
-      } catch (error) {
-        alert('Error generating key: ' + error.message);
+      });
+
+      const keys = await res.json();
+      if (!keys.length) {
+        keyList.innerHTML = '<div class="no-keys">No keys found for your ResellerID. Generate your first key below!</div>';
+        return;
       }
+
+      keys.forEach((k, index) => {
+        const div = document.createElement('div');
+        div.className = 'key-item';
+        div.style.animationDelay = `${index * 0.1}s`;
+        div.innerHTML = `
+          <input value="${k.key}" readonly>
+          <span class="duration">${k.duration}</span>
+          <div class="button-group">
+            <button class="copy-button" onclick="copyKey('${k.key}')">Copy</button>
+            <button class="delete-button" onclick="deleteKey('${k.id}')">Delete</button>
+          </div>
+        `;
+        keyList.appendChild(div);
+      });
+    }
+
+    async function submitKey() {
+  const key = document.getElementById('genKey').value.trim();
+  const duration = document.getElementById('genDuration').value;
+
+  if (!key || !RESELLER_ID) {
+    alert("Missing key or reseller ID");
+    return;
+  }
+
+  // Live check again before inserting
+  const check = await fetch(`${SUPABASE_URL}/rest/v1/resellers?id=eq.${RESELLER_ID}`, {
+    headers: {
+      apikey: SUPABASE_API_KEY,
+      Authorization: `Bearer ${SUPABASE_API_KEY}`
+    }
+  });
+
+  const valid = await check.json();
+  if (valid.length === 0) {
+    alert("Unauthorized. Your Reseller ID is not valid.");
+    localStorage.removeItem('reseller_id');
+    RESELLER_ID = null;
+    updateBlurOverlay();
+    return;
+  }
+
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/keys`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_API_KEY,
+      Authorization: `Bearer ${SUPABASE_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ key, duration, reseller_id: RESELLER_ID })
+  });
+
+  if (response.ok) {
+    await fetch('https://discord.com/api/webhooks/1382054120084734034/7DG3smRTIinQEeFB91U8QvWXYY2GysFKZRTVNH3qU3HPIsQOsr5ZGMFK6isPeDB29XhK', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        embeds: [{
+          title: 'New Key Generated',
+          color: 5763719,
+          fields: [
+            {
+              name: 'Reseller ID',
+              value: RESELLER_ID,
+              inline: true
+            },
+            {
+              name: 'Key',
+              value: key,
+              inline: true
+            },
+            {
+              name: 'Duration',
+              value: duration,
+              inline: true
+            }
+          ],
+          timestamp: new Date().toISOString(),
+          footer: {
+            text: 'Vero Auth System'
+          }
+        }]
+      })
+    });
+
+    document.getElementById('genKey').value = '';
+    document.getElementById('genKey').classList.add('success-flash');
+    setTimeout(() => document.getElementById('genKey').classList.remove('success-flash'), 600);
+    loadKeys();
+  } else {
+    alert("Failed to create key. Try again.");
+  }
+}
+
+
+    async function deleteKey(id) {
+  if (!confirm('Are you sure you want to delete this key?')) return;
+
+  // Get the key details before deletion
+  const keyDetails = await fetch(`${SUPABASE_URL}/rest/v1/keys?id=eq.${id}`, {
+    headers: {
+      apikey: SUPABASE_API_KEY,
+      Authorization: `Bearer ${SUPABASE_API_KEY}`
+    }
+  });
+  const keyData = await keyDetails.json();
+
+  await fetch(`${SUPABASE_URL}/rest/v1/keys?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: {
+      apikey: SUPABASE_API_KEY,
+      Authorization: `Bearer ${SUPABASE_API_KEY}`
+    }
+  });
+  await fetch('https://discord.com/api/webhooks/1381822056756154508/dwAcV4ksUJZhpUZiXccodhzZnnTTHAlREApNWEzc2RuP7d4ciJLXSHkjocDwCMMYmnxv', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      embeds: [{
+        title: 'Key Deleted',
+        color: 15158332, // Red color for deletion
+        fields: [
+          {
+            name: 'Reseller ID',
+            value: RESELLER_ID,
+            inline: true
+          },
+          {
+            name: 'Key',
+            value: keyData[0]?.key || 'Key not found',
+            inline: true
+          },
+          {
+            name: 'Duration',
+            value: keyData[0]?.duration || 'Unknown',
+            inline: true
+          }
+        ],
+        timestamp: new Date().toISOString(),
+        footer: {
+          text: 'Vero Auth System'
+        }
+      }]
+    })
+  });
+
+  loadKeys();
+    }
+
+    function copyKey(key) {
+      navigator.clipboard.writeText(key).then(() => {
+        // Create temporary success message
+        const msg = document.createElement('div');
+        msg.textContent = 'Key copied to clipboard!';
+        msg.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(135deg, #059669, #047857);
+          color: white;
+          padding: 15px 25px;
+          border-radius: 10px;
+          font-weight: 600;
+          z-index: 1000;
+          animation: slideIn 0.3s ease-out;
+        `;
+        document.body.appendChild(msg);
+        setTimeout(() => {
+          msg.style.animation = 'slideOut 0.3s ease-out forwards';
+          setTimeout(() => msg.remove(), 300);
+        }, 2000);
+      });
     }
 
     function randomKey() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let key = '';
-      for (let i = 0; i < 24; i++) {
-        key += chars.charAt(Math.floor(Math.random() * chars.length));
+      let result = '';
+      for (let i = 0; i < 16; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
       }
-      document.getElementById('genKey').value = key;
+      document.getElementById('genKey').value = result;
+      
+      // Add generation animation
+      const input = document.getElementById('genKey');
+      input.style.animation = 'successFlash 0.6s ease-out';
+      setTimeout(() => input.style.animation = '', 600);
+    }
+    createParticles();
+    if (RESELLER_ID) {
+      document.getElementById('resellerIdInput').value = RESELLER_ID;
+      updateBlurOverlay();
+      loadKeys();
+    } else {
+      updateBlurOverlay();
     }
 
-    function openTab(id) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.tablink').forEach(b => b.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      event.target.classList.add('active');
-    }
-
-    function copyKey(keyValue) {
-      const value = keyValue || document.getElementById('genKey').value;
-      if (value) {
-        navigator.clipboard.writeText(value).then(() => {
-          const copyButtons = document.querySelectorAll('.copy-button');
-          copyButtons.forEach(button => {
-            const input = button.parentElement.querySelector('input');
-            if (input && input.value === value) {
-              const originalText = button.textContent;
-              button.textContent = 'Copied!';
-              button.classList.add('copied');
-              setTimeout(() => {
-                button.textContent = originalText;
-                button.classList.remove('copied');
-              }, 2000);
-            }
-          });
-        }).catch(err => {
-          alert('Failed to copy key: ' + err);
-        });
+    // Add input event listener for real-time blur update
+    document.getElementById('resellerIdInput').addEventListener('input', function() {
+      if (this.value.trim().length > 0 && !RESELLER_ID) {
+        document.getElementById('blurOverlay').style.opacity = '0.3';
+      } else if (!RESELLER_ID) {
+        document.getElementById('blurOverlay').style.opacity = '1';
       }
-    }
-    function showSuccessAlert(message) {
-      const alertDiv = document.createElement('div');
-      alertDiv.className = 'success-alert';
-      alertDiv.textContent = message;
-      document.body.appendChild(alertDiv);
+    });
 
-      setTimeout(() => {
-        alertDiv.classList.add('fade-out');
-        setTimeout(() => alertDiv.remove(), 500);
-      }, 2500);
-    }
-    loadKeys();
+    // Add CSS animations for notifications
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+      }
+      @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
   </script>
 </body>
 </html>
